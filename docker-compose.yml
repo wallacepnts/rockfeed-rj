@@ -5,5 +5,5 @@ services:
     ports:
       - "8765:8765"
     volumes:
-      - ./app/data:/app/app/data
+      - ./app/data:/app/data:Z
     restart: unless-stopped

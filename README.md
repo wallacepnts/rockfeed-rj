@@ -65,7 +65,7 @@ Sem compose, direto:
 
 ```bash
 docker build -t rockfeed-rj .
-docker run -d -p 8765:8765 -v ./app/data:/app/app/data --name rockfeed-rj rockfeed-rj
+docker run -d -p 8765:8765 -v ./app/data:/app/data:Z --name rockfeed-rj rockfeed-rj
 ```
 
 ## Assinando no leitor RSS
