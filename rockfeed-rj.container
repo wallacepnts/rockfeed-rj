@@ -1,0 +1,20 @@
+# Quadlet: copie para ~/.config/containers/systemd/rockfeed-rj.container
+# depois: systemctl --user daemon-reload && systemctl --user enable --now rockfeed-rj.service
+#
+# Ajuste o caminho do volume abaixo se o repositório não estiver em %h/rockfeed-rj.
+[Unit]
+Description=RockFeed RJ - feed RSS de shows de rock (container)
+After=network-online.target
+
+[Container]
+Image=localhost/rockfeed-rj:latest
+ContainerName=rockfeed-rj
+PublishPort=8765:8765
+Volume=%h/rockfeed-rj/app/data:/app/data:Z
+AutoUpdate=local
+
+[Service]
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

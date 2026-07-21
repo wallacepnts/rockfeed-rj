@@ -1,6 +1,10 @@
 services:
   rockfeed:
-    build: .
+    build:
+      context: .
+      args:
+        VERSION: ${VERSION:-0.1.0}
+    image: rockfeed-rj:${VERSION:-0.1.0}
     container_name: rockfeed-rj
     ports:
       - "8765:8765"

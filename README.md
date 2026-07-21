@@ -68,6 +68,39 @@ docker build -t rockfeed-rj .
 docker run -d -p 8765:8765 -v ./app/data:/app/data:Z --name rockfeed-rj rockfeed-rj
 ```
 
+### Versionamento da imagem
+
+A versão atual fica no arquivo `VERSION` (semver). Pra buildar já gerando a tag de versão **e** `latest` de uma vez:
+
+```bash
+./scripts/build-image.sh          # usa podman
+./scripts/build-image.sh docker   # ou docker
+```
+
+Isso gera `rockfeed-rj:0.1.0` e `rockfeed-rj:latest` (mesma imagem, duas tags). Pra lançar uma nova versão: edite o `VERSION`, rode o script de novo e, se for usar systemd/Quadlet (abaixo), rode `podman auto-update`.
+
+> O script builda com `--format docker` quando usa Podman — por padrão o Podman gera imagens em formato OCI, que **não suporta `HEALTHCHECK`** (fica silenciosamente ignorado). Se preferir buildar com `podman compose`/`docker compose` em vez do script, o healthcheck não funciona, mas o resto do serviço roda normalmente.
+
+A imagem também expõe um `HEALTHCHECK` (`GET /health` a cada 30s) — usado tanto pelo `podman ps`/`docker ps` (coluna `STATUS`) quanto pelo auto-update do Podman pra decidir se um container "subiu saudável" depois de atualizar.
+
+### Auto-update com Podman + Quadlet
+
+Com o Podman rodando os containers via [Quadlet](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) (unidades systemd geradas automaticamente a partir de arquivos `.container`), dá pra deixar o serviço reiniciar sozinho quando uma imagem local mais nova for buildada:
+
+```bash
+mkdir -p ~/.config/containers/systemd
+cp rockfeed-rj.container ~/.config/containers/systemd/
+systemctl --user daemon-reload
+systemctl --user enable --now rockfeed-rj.service
+
+# habilita o timer que checa/reinicia containers com imagem atualizada
+systemctl --user enable --now podman-auto-update.timer
+```
+
+O `AutoUpdate=local` no `rockfeed-rj.container` faz o Podman comparar o digest da imagem `rockfeed-rj:latest` em uso com o que existe localmente; quando você rebuilda com `./scripts/build-image.sh`, o digest muda e o `podman-auto-update.timer` (roda por padrão diariamente) reinicia o container sozinho. Graças ao `HEALTHCHECK`, se o container novo não ficar saudável dentro do tempo esperado, o Podman reverte pra imagem anterior automaticamente.
+
+Ajuste o caminho do volume em `rockfeed-rj.container` (`%h/rockfeed-rj/app/data`) se o repositório estiver clonado em outro lugar.
+
 ## Assinando no leitor RSS
 
 - **No próprio PC:** assine `http://localhost:8765/feed.xml`.
