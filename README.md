@@ -14,7 +14,7 @@ scrapers (Sympla, Eventim, Articket, Meaple, Bileto, Shotgun,
 
 O serviço roda os scrapers a cada 60 min (configurável em `app/main.py`, `REFRESH_MINUTES`). Cada evento novo vira um item do feed; eventos já vistos são ignorados, então o leitor RSS só te notifica de novidades. Shows cujo dia já passou saem do feed automaticamente.
 
-## Instalação (Fedora/openSUSE)
+## Instalação
 
 ```bash
 cd ~/rockfeed-rj
