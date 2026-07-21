@@ -7,11 +7,18 @@ Description=RockFeed RJ - feed RSS de shows de rock (container)
 After=network-online.target
 
 [Container]
-Image=localhost/rockfeed-rj:latest
+Image=ghcr.io/wallacepnts/rockfeed-rj:latest
 ContainerName=rockfeed-rj
 PublishPort=8765:8765
 Volume=%h/rockfeed-rj/app/data:/app/data:Z
-AutoUpdate=local
+AutoUpdate=registry
+
+HealthCmd=CMD-SHELL python -c "import urllib.request; urllib.request.urlopen('http://localhost:8765/health', timeout=3)"
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=20s
+Notify=healthy
 
 [Service]
 Restart=on-failure

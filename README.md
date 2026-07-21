@@ -77,15 +77,28 @@ A versão atual fica no arquivo `VERSION` (semver). Pra buildar já gerando a ta
 ./scripts/build-image.sh docker   # ou docker
 ```
 
-Isso gera `rockfeed-rj:0.1.0` e `rockfeed-rj:latest` (mesma imagem, duas tags). Pra lançar uma nova versão: edite o `VERSION`, rode o script de novo e, se for usar systemd/Quadlet (abaixo), rode `podman auto-update`.
+Isso gera `rockfeed-rj:0.1.0`, `rockfeed-rj:latest` e as mesmas tags com o prefixo `ghcr.io/wallacepnts/rockfeed-rj` (usadas pelo Quadlet, veja abaixo). Pra lançar uma nova versão: edite o `VERSION`, rode o script de novo, publique no GHCR (`./scripts/push-image.sh`) e o `podman-auto-update.timer` cuida do resto.
 
 > O script builda com `--format docker` quando usa Podman — por padrão o Podman gera imagens em formato OCI, que **não suporta `HEALTHCHECK`** (fica silenciosamente ignorado). Se preferir buildar com `podman compose`/`docker compose` em vez do script, o healthcheck não funciona, mas o resto do serviço roda normalmente.
 
 A imagem também expõe um `HEALTHCHECK` (`GET /health` a cada 30s) — usado tanto pelo `podman ps`/`docker ps` (coluna `STATUS`) quanto pelo auto-update do Podman pra decidir se um container "subiu saudável" depois de atualizar.
 
-### Auto-update com Podman + Quadlet
+### Auto-update com Podman + Quadlet + GHCR
 
-Com o Podman rodando os containers via [Quadlet](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) (unidades systemd geradas automaticamente a partir de arquivos `.container`), dá pra deixar o serviço reiniciar sozinho quando uma imagem local mais nova for buildada:
+A imagem é publicada no GitHub Container Registry (`ghcr.io/wallacepnts/rockfeed-rj`). Login (uma vez só; precisa de um [Personal Access Token](https://github.com/settings/tokens) com escopo `write:packages`):
+
+```bash
+echo "$SEU_TOKEN" | podman login ghcr.io -u wallacepnts --password-stdin
+```
+
+Build + publish de uma nova versão:
+
+```bash
+./scripts/build-image.sh
+./scripts/push-image.sh
+```
+
+Com o Podman rodando o container via [Quadlet](https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html) (unidades systemd geradas automaticamente a partir de arquivos `.container`):
 
 ```bash
 mkdir -p ~/.config/containers/systemd
@@ -93,11 +106,13 @@ cp rockfeed-rj.container ~/.config/containers/systemd/
 systemctl --user daemon-reload
 systemctl --user enable --now rockfeed-rj.service
 
-# habilita o timer que checa/reinicia containers com imagem atualizada
+# habilita o timer que checa/reinicia containers com imagem atualizada no registry
 systemctl --user enable --now podman-auto-update.timer
 ```
 
-O `AutoUpdate=local` no `rockfeed-rj.container` faz o Podman comparar o digest da imagem `rockfeed-rj:latest` em uso com o que existe localmente; quando você rebuilda com `./scripts/build-image.sh`, o digest muda e o `podman-auto-update.timer` (roda por padrão diariamente) reinicia o container sozinho. Graças ao `HEALTHCHECK`, se o container novo não ficar saudável dentro do tempo esperado, o Podman reverte pra imagem anterior automaticamente.
+O `AutoUpdate=registry` no `rockfeed-rj.container` faz o `podman-auto-update.timer` (roda diariamente por padrão) checar `ghcr.io/wallacepnts/rockfeed-rj:latest` periodicamente; quando o digest publicado muda (após um `push-image.sh`), o Podman baixa a imagem nova e reinicia o container sozinho. O healthcheck (`HealthCmd`/`HealthInterval`/... no próprio `.container`, batendo em `/health`) decide se a atualização "pegou" — se o container novo não ficar saudável dentro do `HealthStartPeriod`, o Podman reverte pra imagem anterior automaticamente. O `Notify=healthy` faz o systemd só considerar o serviço "ativo" depois do primeiro healthcheck passar.
+
+Se o pacote no GHCR ficar privado (padrão no primeiro push), o `podman login` precisa continuar válido na máquina que roda o auto-update — o token fica salvo em `~/.config/containers/auth.json`.
 
 Ajuste o caminho do volume em `rockfeed-rj.container` (`%h/rockfeed-rj/app/data`) se o repositório estiver clonado em outro lugar.
 
