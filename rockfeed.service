@@ -1,0 +1,13 @@
+# systemd: copie para ~/.config/systemd/user/rockfeed.service
+# depois: systemctl --user daemon-reload && systemctl --user enable --now rockfeed
+[Unit]
+Description=RockFeed RJ - feed RSS de shows de rock
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/rockfeed-rj
+ExecStart=%h/rockfeed-rj/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
