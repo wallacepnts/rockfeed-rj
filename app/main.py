@@ -1,7 +1,7 @@
 """Microserviço: serve /feed.xml e atualiza os scrapers em background.
 
-Rodar:  uvicorn app.main:app --host 0.0.0.0 --port 8000
-Feed:   http://localhost:8000/feed.xml
+Rodar:  uvicorn app.main:app --host 0.0.0.0 --port 8765
+Feed:   http://localhost:8765/feed.xml
 """
 from __future__ import annotations
 

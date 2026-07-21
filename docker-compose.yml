@@ -1,0 +1,9 @@
+services:
+  rockfeed:
+    build: .
+    container_name: rockfeed-rj
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./app/data:/app/app/data
+    restart: unless-stopped

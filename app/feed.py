@@ -7,7 +7,7 @@ from email.utils import format_datetime
 from app import store
 
 CHANNEL_TITLE = "Shows de Rock no Rio de Janeiro"
-CHANNEL_LINK = "http://localhost:8000/feed.xml"
+CHANNEL_LINK = "http://localhost:8765/feed.xml"
 CHANNEL_DESC = "Agregador de shows de rock em sites de ingressos do RJ"
 
 

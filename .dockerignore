@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+app/data/
+tests/
+.git/
+.gitignore
+CLAUDE.md
+README.md
+rockfeed.service
+requirements-dev.txt
+docker-compose.yml

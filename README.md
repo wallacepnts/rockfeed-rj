@@ -22,10 +22,10 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 playwright install chromium   # navegador usado pelos scrapers da Shotgun e uTicket
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+uvicorn app.main:app --host 127.0.0.1 --port 8765
 ```
 
-Feed em: `http://localhost:8000/feed.xml`
+Feed em: `http://localhost:8765/feed.xml`
 
 Endpoints úteis:
 - `GET /feed.xml` — o feed RSS (suporta `ETag`/`304 Not Modified`)
@@ -51,10 +51,27 @@ systemctl --user enable --now rockfeed
 loginctl enable-linger $USER   # continua rodando sem sessão aberta
 ```
 
+## Rodar com Docker/Podman
+
+```bash
+docker compose up -d --build
+# ou, com Podman:
+podman compose up -d --build
+```
+
+O `docker-compose.yml` expõe a porta 8765 e mapeia `./app/data` como volume, pra o banco SQLite sobreviver a rebuilds do container. A imagem já inclui o Chromium (usado pelos scrapers da Shotgun e uTicket) — o build demora um pouco mais por causa disso (baixa ~300MB), mas só na primeira vez.
+
+Sem compose, direto:
+
+```bash
+docker build -t rockfeed-rj .
+docker run -d -p 8765:8765 -v ./app/data:/app/app/data --name rockfeed-rj rockfeed-rj
+```
+
 ## Assinando no leitor RSS
 
-- **No próprio PC:** assine `http://localhost:8000/feed.xml`.
-- **No celular (Pixel):** na mesma rede Wi-Fi, use `http://IP-DO-PC:8000/feed.xml` (troque `--host` para `0.0.0.0`). Ou use Tailscale para acessar de qualquer lugar sem expor porta.
+- **No próprio PC:** assine `http://localhost:8765/feed.xml`.
+- **No celular (Pixel):** na mesma rede Wi-Fi, use `http://IP-DO-PC:8765/feed.xml` (troque `--host` para `0.0.0.0`). Ou use Tailscale para acessar de qualquer lugar sem expor porta.
 
 ## Fontes
 
