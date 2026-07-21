@@ -20,6 +20,11 @@ HealthRetries=3
 HealthStartPeriod=20s
 Notify=healthy
 
+# tsdproxy discovery — expõe na tailnet como https://rockfeed.<sua-tailnet>.ts.net
+Label=tsdproxy.enable=true
+Label=tsdproxy.name=rockfeed
+Label=tsdproxy.port.web=443/https:8765/http
+
 [Service]
 Restart=on-failure
 
