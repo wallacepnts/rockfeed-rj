@@ -29,6 +29,7 @@ Feed em: `http://localhost:8765/feed.xml`
 
 Endpoints úteis:
 - `GET /feed.xml` — o feed RSS (suporta `ETag`/`304 Not Modified`)
+- `GET /events.json` — exportação estruturada dos eventos (campos separados: `venue`, `address`, `organizer`, `date`, `price` etc.), pra importação por outros sistemas — não é feito pra leitor RSS, é pra automação (ver `app/events_json.py`)
 - `GET /refresh` — força uma varredura agora (limitado a 1 vez a cada 5 min; bom pra testar scrapers)
 - `GET /health` — status e contagem de eventos
 

@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import FastAPI, HTTPException, Request, Response
 
 from app import store
+from app.events_json import build_events_json
 from app.feed import build_rss
 from app.scrapers.articket import ArticketScraper
 from app.scrapers.bileto import BiletoScraper
@@ -88,6 +89,13 @@ def feed(request: Request) -> Response:
         media_type="application/rss+xml",
         headers={"ETag": etag},
     )
+
+
+@app.get("/events.json")
+def events_json() -> list[dict]:
+    """Exportação estruturada dos eventos, pra importação por sistemas
+    externos (ex: Revel) — não é o feed de leitura (ver /feed.xml)."""
+    return build_events_json()
 
 
 @app.get("/refresh")

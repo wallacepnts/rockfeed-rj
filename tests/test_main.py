@@ -42,6 +42,10 @@ def test_feed_returns_200_when_etag_stale():
     assert resp.status_code == 200
 
 
+def test_events_json_returns_list():
+    assert m.events_json() == []
+
+
 def test_refresh_blocks_repeated_calls(monkeypatch):
     monkeypatch.setattr(m, "run_scrapers", lambda: {"ok": True})
     m.refresh()
