@@ -6,6 +6,8 @@ After=network-online.target
 
 [Service]
 WorkingDirectory=%h/rockfeed-rj
+# Opcional: REVEL_INGEST_URL e REVEL_INGEST_API_KEY, se for enviar eventos pro Revel.
+EnvironmentFile=-%h/rockfeed-rj/.env
 ExecStart=%h/rockfeed-rj/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8765
 Restart=on-failure
 

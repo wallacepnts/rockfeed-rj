@@ -1,6 +1,6 @@
 # RockFeed RJ 🎸
 
-Microserviço que varre sites de venda de ingressos, filtra shows de **rock no estado do Rio de Janeiro** (capital e interior — Volta Redonda, Campos dos Goytacazes, Maricá etc., não só a cidade do Rio) e publica tudo como um **feed RSS** — pronto pra assinar no seu leitor (Feeder, NewsBlur, Miniflux, etc).
+Microserviço que varre sites de venda de ingressos, filtra shows de **rock no estado do Rio de Janeiro** (capital e interior — Volta Redonda, Campos dos Goytacazes, Maricá etc., não só a cidade do Rio) e publica tudo como um **feed RSS** — pronto pra assinar no seu leitor (Feeder, NewsBlur, Miniflux, etc). Também pode **enviar os eventos automaticamente pro [Revel](https://github.com/DuRockRJ/revel-backend)** (a plataforma de ingressos do DuRock RJ), como rascunho pra revisão manual.
 
 ## Como funciona
 
@@ -10,9 +10,10 @@ scrapers (Sympla, Eventim, Articket, Meaple, Bileto, Shotgun,
    → filtro de rock (keywords/categoria própria do site, conforme a fonte)
    → SQLite (deduplicação por hash de fonte+URL)
    → /feed.xml (RSS 2.0)
+   → Revel, via POST /api/external/events (opcional — ver "Envio automático pro Revel")
 ```
 
-O serviço roda os scrapers a cada 60 min (configurável em `app/main.py`, `REFRESH_MINUTES`). Cada evento novo vira um item do feed; eventos já vistos são ignorados, então o leitor RSS só te notifica de novidades. Shows cujo dia já passou saem do feed automaticamente.
+O serviço roda os scrapers a cada 60 min (configurável em `app/main.py`, `REFRESH_MINUTES`). Cada evento novo vira um item do feed; eventos já vistos são ignorados, então o leitor RSS só te notifica de novidades. Shows cujo dia já passou saem do feed automaticamente. Se o envio pro Revel estiver configurado, a mesma varredura também empurra os eventos pra lá.
 
 ## Instalação
 
@@ -32,6 +33,40 @@ Endpoints úteis:
 - `GET /events.json` — exportação estruturada dos eventos (campos separados: `venue`, `address`, `organizer`, `date`, `price` etc.), pra importação por outros sistemas — não é feito pra leitor RSS, é pra automação (ver `app/events_json.py`)
 - `GET /refresh` — força uma varredura agora (limitado a 1 vez a cada 5 min; bom pra testar scrapers)
 - `GET /health` — status e contagem de eventos
+
+### Envio automático pro Revel
+
+Além de servir `/events.json` passivamente, o serviço pode **enviar** os eventos pro Revel a
+cada varredura (`app/revel_push.py`), via `POST /api/external/events`. Configure via
+variáveis de ambiente (num arquivo `.env` na raiz do projeto — veja `EnvironmentFile=` em
+`rockfeed.service`/`rockfeed-rj.container`, ou `environment:` no `docker-compose.yml`):
+
+```bash
+REVEL_INGEST_URL=https://api.revel.exemplo.com.br/api/external/events
+REVEL_INGEST_API_KEY=<o mesmo valor de EXTERNAL_INGEST_API_KEY configurado no Revel>
+```
+
+Se qualquer uma das duas faltar, o envio fica desabilitado silenciosamente — útil pra rodar
+localmente sem o Revel. O envio nunca bloqueia nem derruba a varredura: se o Revel estiver
+fora do ar (ele roda intermitente, ao contrário do RockFeed), a falha só é logada e a próxima
+varredura (60 min) tenta de novo com os dados atualizados — sem retry.
+
+**O que acontece do lado do Revel** (endpoint implementado em `revel-backend`, app `events`):
+
+- Cada evento vira um `Event` com `status=DRAFT` — nada é publicado automaticamente, um admin
+  revisa e publica manualmente depois.
+- Dedup pelo `uid` (o mesmo hash de `source|url` usado aqui) — reenviar o mesmo evento
+  atualiza o rascunho existente em vez de duplicar. Uma vez publicado (qualquer status além
+  de `DRAFT`), o Revel para de tocar naquele evento — reenvios subsequentes são ignorados.
+- O `organizer` vira uma `Organization` (criada automaticamente se não existir; eventos sem
+  organizador caem numa organização "Não classificado" pra classificar manualmente depois).
+  Uma vez atribuída, a organização não é mais trocada em reenvios futuros.
+- É criado um ingresso do tipo "externo", apontando pra `url` do evento original (Sympla,
+  Eventim, etc.), com o `price` quando disponível.
+- A `image` é baixada e usada como capa do evento (assíncrono, não atrasa o envio) — aceita
+  paisagem, retrato ou quadrada, mas descarta imagens pequenas demais (logos, placeholders
+  1x1), pra não virar capa feia.
+- Títulos que vierem TODO EM MAIÚSCULA são normalizados pra Title Case; do contrário ficam como vieram.
 
 ### Testes
 

@@ -16,6 +16,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from app import store
 from app.events_json import build_events_json
 from app.feed import build_rss
+from app.revel_push import push_to_revel
 from app.scrapers.articket import ArticketScraper
 from app.scrapers.bileto import BiletoScraper
 from app.scrapers.clubedoingresso import ClubeDoIngressoScraper
@@ -59,6 +60,7 @@ def run_scrapers() -> dict[str, int]:
         except Exception:
             log.exception("scraper %s falhou", scraper.name)
             report[scraper.name] = -1
+    push_to_revel()
     return report
 
 

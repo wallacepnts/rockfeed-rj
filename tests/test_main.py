@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 import pytest
 from fastapi import HTTPException
 from starlette.requests import Request
@@ -63,3 +65,11 @@ def test_refresh_allows_call_after_interval_elapses(monkeypatch):
         m, "_last_manual_refresh", datetime.now(timezone.utc) - m.MIN_MANUAL_REFRESH_INTERVAL
     )
     assert m.refresh() == {"ok": True}
+
+
+def test_run_scrapers_pushes_to_revel_after_scraping(monkeypatch):
+    monkeypatch.setattr(m, "SCRAPERS", [])
+    push_mock = MagicMock()
+    monkeypatch.setattr(m, "push_to_revel", push_mock)
+    m.run_scrapers()
+    push_mock.assert_called_once()

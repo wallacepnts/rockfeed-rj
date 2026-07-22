@@ -7,4 +7,7 @@ services:
       - "8765:8765"
     volumes:
       - ./app/data:/app/data:Z
+    environment:
+      - REVEL_INGEST_URL=${REVEL_INGEST_URL:-}
+      - REVEL_INGEST_API_KEY=${REVEL_INGEST_API_KEY:-}
     restart: unless-stopped

@@ -12,6 +12,8 @@ ContainerName=rockfeed-rj
 PublishPort=8765:8765
 Volume=%h/rockfeed-rj/app/data:/app/data:Z
 AutoUpdate=registry
+# Opcional: REVEL_INGEST_URL e REVEL_INGEST_API_KEY, se for enviar eventos pro Revel.
+EnvironmentFile=-%h/rockfeed-rj/.env
 
 HealthCmd=CMD-SHELL python -c "import urllib.request; urllib.request.urlopen('http://localhost:8765/health', timeout=3)"
 HealthInterval=30s
