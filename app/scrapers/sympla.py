@@ -126,6 +126,7 @@ class SymplaScraper(Scraper):
         return events
 
     def _parse_event(self, client: httpx.Client, label: str, item: dict) -> Event:
+        images = item.get("images") or {}
         location = item.get("location") or {}
         street_line = " ".join(
             p for p in (location.get("address"), location.get("address_num")) if p
@@ -154,7 +155,7 @@ class SymplaScraper(Scraper):
             date=self._parse_date(item.get("start_date")),
             end_date=self._parse_date(item.get("end_date")),
             price=_fetch_lowest_price(client, item.get("id")),
-            image=(item.get("images") or {}).get("original", ""),
+            image=images.get("lg") or images.get("original", ""),
         )
 
     @staticmethod

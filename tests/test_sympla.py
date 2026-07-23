@@ -10,7 +10,10 @@ EVENT_ITEM = {
     "url": "https://www.sympla.com.br/evento/kruger/3484588",
     "start_date": "2026-07-25T01:00:00+00:00",
     "end_date": "2026-07-25T05:00:00+00:00",
-    "images": {"original": "https://images.sympla.com.br/img.jpg"},
+    "images": {
+        "original": "https://images.sympla.com.br/img.jpg",
+        "lg": "https://images.sympla.com.br/img-lg.jpg",
+    },
     "location": {
         "name": "DRUNKS PUB",
         "address": "Estrada Rio do A",
@@ -67,9 +70,20 @@ def test_parses_single_page_of_events():
     assert e.city == "Rio de Janeiro"
     assert e.date.isoformat() == "2026-07-25T01:00:00+00:00"
     assert e.end_date.isoformat() == "2026-07-25T05:00:00+00:00"
-    assert e.image == "https://images.sympla.com.br/img.jpg"
+    assert e.image == "https://images.sympla.com.br/img-lg.jpg"
     assert e.price == "R$ 18.99"
     assert client.post.call_count == 1
+
+
+def test_falls_back_to_original_image_when_lg_missing():
+    item = {**EVENT_ITEM, "images": {"original": "https://images.sympla.com.br/img.jpg"}}
+    client = make_client([make_response([item], total=1)])
+    with patch("app.scrapers.sympla.get_client") as gc, \
+         patch("app.scrapers.sympla.ORGANIZERS", [("drunkspubcg", 14627486)]):
+        gc.return_value = client
+        events = SymplaScraper().fetch()
+
+    assert events[0].image == "https://images.sympla.com.br/img.jpg"
 
 
 def test_price_fetch_failure_leaves_price_blank():
