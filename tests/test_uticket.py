@@ -72,7 +72,7 @@ def test_parses_organizer_events_and_standalone_events():
     assert e.date.isoformat() == "2026-07-25T23:00:00+00:00"
     assert e.end_date.isoformat() == "2026-07-26T07:20:00+00:00"
     assert e.price == "R$ 15.00"
-    assert e.image == "https://img.uticket.com.br/user/240767"
+    assert e.image == "https://img.uticket.com.br/event/01M89SS401PU7B/l"
     assert e.description == "Texto com tags & entidades"
     assert e.source == "uticket:garagegrindhouse"
 

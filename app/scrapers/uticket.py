@@ -30,6 +30,7 @@ from app.scrapers.base import Scraper, strip_html
 from app.scrapers.browser import browser_page
 
 API_BASE = "https://api.uticket.com.br"
+IMAGE_BASE = "https://img.uticket.com.br/event"
 
 ORGANIZERS = [
     "garagegrindhouse",
@@ -145,7 +146,7 @@ class UticketScraper(Scraper):
             date=date,
             end_date=end_date,
             price=self._fetch_lowest_price(page, event_id),
-            image=info.get("userImgUrl", ""),
+            image=f"{IMAGE_BASE}/{event_id}/l",
             description=description,
         )
 
