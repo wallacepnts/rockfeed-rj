@@ -37,6 +37,11 @@ CHANNELS = [
 
 log = logging.getLogger("rockfeed")
 
+# Coordenadas Bar hospeda shows de produtoras terceiras; quando a descrição
+# credita a Mr. Trip Produções, ela é a organizadora de verdade, não a casa.
+MR_TRIP_SLUG = "coordenadasbar"
+MR_TRIP_MARKER = "Mr. Trip Produções"
+
 
 def _flatten_description(nodes: list | None) -> str:
     """A descrição vem em rich-text (lista de parágrafos com 'children'); vira texto puro."""
@@ -99,6 +104,11 @@ class MeapleScraper(Scraper):
 
         date = self._parse_date(raw.get("startsAt"))
         end_date = self._parse_date(raw.get("endsAt"))
+        description = _flatten_description(raw.get("description"))
+
+        organizer = channel.get("name", "")
+        if slug == MR_TRIP_SLUG and MR_TRIP_MARKER in description:
+            organizer = "Mr. Trip Produções"
 
         return Event(
             title=(raw.get("name") or "").strip(),
@@ -106,12 +116,12 @@ class MeapleScraper(Scraper):
             source=f"{self.name}:{slug}",
             venue=channel.get("name", ""),
             address=address,
-            organizer=channel.get("name", ""),
+            organizer=organizer,
             city=addr.get("city") or "Rio de Janeiro",
             date=date,
             end_date=end_date,
             image=(raw.get("image") or {}).get("url", ""),
-            description=_flatten_description(raw.get("description")),
+            description=description,
         )
 
     @staticmethod

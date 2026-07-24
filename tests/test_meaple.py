@@ -83,3 +83,74 @@ def test_parses_event_and_skips_canceled():
     assert e.end_date.isoformat() == "2026-07-25T05:00:00+00:00"
     assert e.image == "https://files.meaple.com.br/img.png"
     assert e.description == "Sexta - 24 de Julho\nAbertura: 19h"
+
+
+def _mr_trip_channel_and_events(description_text: str):
+    channel = {
+        "channel": {
+            "id": "coord123",
+            "name": "COORDENADAS BAR",
+            "slug": "coordenadasbar",
+        }
+    }
+    events = {
+        "events": [
+            {
+                "id": "evt1",
+                "slug": "hyde-park",
+                "name": "Hyde Park",
+                "description": [
+                    {"type": "paragraph", "children": [{"text": description_text}]},
+                ],
+                "canceledAt": None,
+                "startsAt": "2026-07-31T22:00:00.000Z",
+                "endsAt": None,
+                "image": None,
+                "address": {},
+            },
+        ]
+    }
+    channel_resp = MagicMock()
+    channel_resp.raise_for_status.side_effect = None
+    channel_resp.json.return_value = channel
+
+    events_resp = MagicMock()
+    events_resp.raise_for_status.side_effect = None
+    events_resp.json.return_value = events
+
+    client = MagicMock()
+    client.get.side_effect = [channel_resp, events_resp]
+    client.__enter__.return_value = client
+    client.__exit__.return_value = False
+    return client
+
+
+def test_coordenadas_bar_credits_mr_trip_as_organizer_when_marked():
+    client = _mr_trip_channel_and_events("Local: Coordenadas Bar\nRealização: Mr. Trip Produções")
+    with patch("app.scrapers.meaple.get_client") as gc, \
+         patch("app.scrapers.meaple.CHANNELS", ["coordenadasbar"]):
+        gc.return_value = client
+        events = MeapleScraper().fetch()
+
+    assert events[0].organizer == "Mr. Trip Produções"
+    assert events[0].venue == "COORDENADAS BAR"
+
+
+def test_coordenadas_bar_credits_mr_trip_with_alternate_phrasing():
+    client = _mr_trip_channel_and_events("Realizado pela Mr. Trip Produções, o evento une...")
+    with patch("app.scrapers.meaple.get_client") as gc, \
+         patch("app.scrapers.meaple.CHANNELS", ["coordenadasbar"]):
+        gc.return_value = client
+        events = MeapleScraper().fetch()
+
+    assert events[0].organizer == "Mr. Trip Produções"
+
+
+def test_coordenadas_bar_keeps_venue_as_organizer_without_marker():
+    client = _mr_trip_channel_and_events("Local: Coordenadas Bar")
+    with patch("app.scrapers.meaple.get_client") as gc, \
+         patch("app.scrapers.meaple.CHANNELS", ["coordenadasbar"]):
+        gc.return_value = client
+        events = MeapleScraper().fetch()
+
+    assert events[0].organizer == "COORDENADAS BAR"
