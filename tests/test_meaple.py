@@ -154,3 +154,49 @@ def test_coordenadas_bar_keeps_venue_as_organizer_without_marker():
         events = MeapleScraper().fetch()
 
     assert events[0].organizer == "COORDENADAS BAR"
+
+
+def test_unescapes_html_entities_in_title_and_venue():
+    channel = {
+        "channel": {
+            "id": "cmelsb5uf00vkqq0mdml3ziw6",
+            "name": "Bulldog Rock &amp; Bar",
+            "slug": "bulldogrockbar",
+        }
+    }
+    events = {
+        "events": [
+            {
+                "id": "evt1",
+                "slug": "rock-n-beer",
+                "name": "Rock N&#039; Beer",
+                "description": [],
+                "canceledAt": None,
+                "startsAt": "2026-07-31T22:00:00.000Z",
+                "endsAt": None,
+                "image": None,
+                "address": {},
+            },
+        ]
+    }
+    channel_resp = MagicMock()
+    channel_resp.raise_for_status.side_effect = None
+    channel_resp.json.return_value = channel
+
+    events_resp = MagicMock()
+    events_resp.raise_for_status.side_effect = None
+    events_resp.json.return_value = events
+
+    client = MagicMock()
+    client.get.side_effect = [channel_resp, events_resp]
+    client.__enter__.return_value = client
+    client.__exit__.return_value = False
+
+    with patch("app.scrapers.meaple.get_client") as gc, \
+         patch("app.scrapers.meaple.CHANNELS", ["bulldogrockbar"]):
+        gc.return_value = client
+        events_out = MeapleScraper().fetch()
+
+    assert events_out[0].title == "Rock N' Beer"
+    assert events_out[0].venue == "Bulldog Rock & Bar"
+    assert events_out[0].organizer == "Bulldog Rock & Bar"

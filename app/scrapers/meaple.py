@@ -13,6 +13,7 @@ Adicione outros canais de rock que você acompanha em CHANNELS.
 """
 from __future__ import annotations
 
+import html
 import logging
 from datetime import datetime
 
@@ -106,15 +107,16 @@ class MeapleScraper(Scraper):
         end_date = self._parse_date(raw.get("endsAt"))
         description = _flatten_description(raw.get("description"))
 
-        organizer = channel.get("name", "")
+        channel_name = html.unescape(channel.get("name", ""))
+        organizer = channel_name
         if slug == MR_TRIP_SLUG and MR_TRIP_MARKER in description:
             organizer = "Mr. Trip Produções"
 
         return Event(
-            title=(raw.get("name") or "").strip(),
+            title=html.unescape((raw.get("name") or "").strip()),
             url=f"https://meaple.com.br/{slug}/{raw.get('slug', '')}",
             source=f"{self.name}:{slug}",
-            venue=channel.get("name", ""),
+            venue=channel_name,
             address=address,
             organizer=organizer,
             city=addr.get("city") or "Rio de Janeiro",
