@@ -41,6 +41,9 @@ EVENTS = [
     (124526, None),
     (123300, None),
     (123089, None),
+    (103244, None),
+    (95883, None),
+    (124279, None),
 ]
 
 log = logging.getLogger("rockfeed")

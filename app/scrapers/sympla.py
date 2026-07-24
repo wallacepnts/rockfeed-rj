@@ -56,6 +56,7 @@ ORGANIZERS = [
     ("bulldogrockbar", 28193580),
     ("calaboucorockbar", 17985282),
     ("schoolofrockbarradatijuca", 307168404),
+    ("sessaodupla", 265001),
 ]
 
 PAGE_SIZE = 24
@@ -297,4 +298,7 @@ EVENTS = [
     ("https://www.sympla.com.br/evento/arraia-do-rock/3515234", None),
     ("https://www.sympla.com.br/evento/rock-no-olimpo-faces-da-deusa/3499885", None),
     ("https://www.sympla.com.br/evento/rock-in-virgo-rio-de-janeiro/3468280", None),
+    ("https://www.sympla.com.br/evento/plutao-ja-foi-planeta-convida-bia-messis/3494299", None),
+    ("https://www.sympla.com.br/evento/john-bianchi-lancamento-album-sinestesia-abertura-banda-mater/3322783", None),
+    ("https://www.sympla.com.br/evento/banda-beat-shaver-blues-ao-vivo-no-mississipi-delta-blues-bar/3498261", None),
 ]
