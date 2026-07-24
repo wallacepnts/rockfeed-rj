@@ -6,7 +6,7 @@ Microserviço que varre sites de venda de ingressos, filtra shows de **rock no e
 
 ```
 scrapers (Sympla, Eventim, Articket, Meaple, Bileto, Shotgun,
-          uTicket, Clube do Ingresso, Uhuu)
+          uTicket, Clube do Ingresso, Uhuu, Leve Ingresso)
    → filtro de rock (keywords/categoria própria do site, conforme a fonte)
    → SQLite (deduplicação por hash de fonte+URL)
    → /feed.xml (RSS 2.0)
@@ -170,6 +170,7 @@ Ajuste o caminho do volume em `rockfeed-rj.container` (`%h/rockfeed-rj/app/data`
 | **uTicket** | Automática, por produtor rastreado (`ORGANIZERS`) + lista avulsa (`EVENTS`) | Site protegido por Cloudflare — usa navegador real (Playwright) |
 | **Clube do Ingresso** | Só lista avulsa (`EVENTS` em `clubedoingresso.py`) | Sem página de produtor; a listagem geral do site é nacional e não dá pra filtrar por cidade/gênero |
 | **Uhuu** | Só lista avulsa (`EVENTS` em `uhuu.py`) | Sem página de produtor nem listagem filtrável |
+| **Leve Ingresso** | Só lista avulsa (`EVENTS` em `leveingresso.py`) | HTML tradicional, sem bloqueio; sem página de produtor nem organizador exposto |
 
 "Automática" significa que, uma vez que um produtor/canal/local está na lista rastreada, novos shows dele aparecem sozinhos nas próximas varreduras — sem precisar mexer no código. Fontes "só lista avulsa" exigem adicionar o link de cada show manualmente.
 
