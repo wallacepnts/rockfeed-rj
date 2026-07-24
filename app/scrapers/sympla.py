@@ -48,6 +48,7 @@ ORGANIZERS = [
     ("hallted", 307272757),
     ("erreifestival4", 12357135),
     ("roxxmusicbar", 22560506),
+    ("festemorj", 165690),
 ]
 
 PAGE_SIZE = 24
@@ -276,4 +277,10 @@ EVENTS = [
     # ORGANIZERS acima — removidos daqui pra não duplicar no feed.
     ("https://www.sympla.com.br/evento/dr-chud-misfitis-rio-de-janeiro/3373200", None),
     ("https://www.sympla.com.br/evento/animals-lab-24-de-julho-heavy-beer/3462550", "LET'S ROCK"),
+    ("https://www.sympla.com.br/evento/show-the-docs/3512510", None),
+    ("https://www.sympla.com.br/evento/vinx-no-garage/3509641", None),
+    ("https://www.sympla.com.br/evento/anti-climax/3496669", None),
+    ("https://www.sympla.com.br/evento/backthothe90-s-show-case-elvm-2026/3514709", None),
+    ("https://www.sympla.com.br/evento/teto-preto-mokambo-e-coyote-valvulado/3490755", None),
+    ("https://www.sympla.com.br/evento/stay-negative-aniversario-dessa-pazinatto/3506149", None),
 ]
