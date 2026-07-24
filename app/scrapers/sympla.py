@@ -49,6 +49,8 @@ ORGANIZERS = [
     ("erreifestival4", 12357135),
     ("roxxmusicbar", 22560506),
     ("festemorj", 165690),
+    ("oclapub", 7745786),
+    ("studiosuburbia", 315545187),
 ]
 
 PAGE_SIZE = 24
@@ -283,4 +285,11 @@ EVENTS = [
     ("https://www.sympla.com.br/evento/backthothe90-s-show-case-elvm-2026/3514709", None),
     ("https://www.sympla.com.br/evento/teto-preto-mokambo-e-coyote-valvulado/3490755", None),
     ("https://www.sympla.com.br/evento/stay-negative-aniversario-dessa-pazinatto/3506149", None),
+    ("https://www.sympla.com.br/evento/glamslam-party-rio-de-janeiro-tuff-nite-stinger-facing-fear/3510825", None),
+    ("https://www.sympla.com.br/evento/e-eu-que-era-emo-anarriemo-no-rock-n-beer/3475035", None),
+    ("https://www.sympla.com.br/evento/the-rocks-festival/3422473", None),
+    ("https://www.sympla.com.br/evento/festa-tape-25-07-2026-18h/3486144", None),
+    ("https://www.sympla.com.br/evento/arraia-do-rock/3515234", None),
+    ("https://www.sympla.com.br/evento/rock-no-olimpo-faces-da-deusa/3499885", None),
+    ("https://www.sympla.com.br/evento/rock-in-virgo-rio-de-janeiro/3468280", None),
 ]
