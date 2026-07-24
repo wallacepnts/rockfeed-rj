@@ -47,6 +47,7 @@ ORGANIZERS = [
     ("rocknewyork", 18932139),
     ("hallted", 307272757),
     ("erreifestival4", 12357135),
+    ("roxxmusicbar", 22560506),
 ]
 
 PAGE_SIZE = 24
