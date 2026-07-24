@@ -24,6 +24,9 @@ EVENTS = [
     # (url, organizer_override — None se você não souber quem produz)
     ("https://leveingresso.com/comprar/518/12-09-rodox-sao-goncalo-rj", None),
     ("https://leveingresso.com/comprar/510/17-09-mateus-asato-world-tour-rio-de-janeiro", None),
+    ("https://leveingresso.com/comprar/547/12-11-oficina-g3-nova-iguacu-rj", None),
+    ("https://leveingresso.com/comprar/548/13-11-oficina-g3-sao-goncalo-rj", None),
+    ("https://leveingresso.com/comprar/549/14-11-oficina-g3-rodox-rio-de-janeiro-rj", None),
 ]
 
 # Horário local do Rio/SP é UTC-3 o ano todo desde o fim do horário de
