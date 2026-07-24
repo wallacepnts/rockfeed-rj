@@ -36,3 +36,29 @@ def test_same_url_different_source_is_not_a_duplicate():
 def test_latest_respects_limit():
     store.upsert([make_event(url=f"http://x/{i}") for i in range(5)])
     assert len(store.latest(2)) == 2
+
+
+def test_upsert_refreshes_fields_of_existing_event():
+    event = make_event()
+    event.organizer = "Coordenadas Bar"
+    store.upsert([event])
+
+    updated = make_event()
+    updated.organizer = "Mr. Trip Produções"
+    inserted = store.upsert([updated])
+
+    assert inserted == 0
+    rows = store.latest(10)
+    assert len(rows) == 1
+    assert rows[0]["organizer"] == "Mr. Trip Produções"
+
+
+def test_upsert_preserves_found_at_on_update():
+    store.upsert([make_event()])
+    first_found_at = store.latest(10)[0]["found_at"]
+
+    updated = make_event()
+    updated.found_at = updated.found_at.replace(year=updated.found_at.year + 1)
+    store.upsert([updated])
+
+    assert store.latest(10)[0]["found_at"] == first_found_at
