@@ -24,6 +24,10 @@ EVENTS = [
     "https://uhuu.com/evento/rj/rio-de-janeiro/tributo-elis-regina-16463",
     "https://uhuu.com/evento/rj/sao-joao-de-meriti/nando-reis-16546",
     "https://uhuu.com/evento/rj/rio-de-janeiro/guilherme-de-sa-16556",
+    "https://uhuu.com/evento/rj/rio-de-janeiro/elton-john-session-16179",
+    "https://uhuu.com/evento/rj/rio-de-janeiro/metallica-the-ultimate-experience-16647",
+    "https://uhuu.com/evento/rj/rio-de-janeiro/toca-raul-o-espetaculo-do-maluco-beleza-16641",
+    "https://uhuu.com/evento/rj/rio-de-janeiro/phil-collins-in-concert-tributo-16646",
 ]
 
 log = logging.getLogger("rockfeed")
