@@ -52,6 +52,7 @@ ORGANIZERS = [
     ("oclapub", 7745786),
     ("studiosuburbia", 315545187),
     ("gabrielmezzalira", 13209059),
+    ("oabrigopub", 25086566),
 ]
 
 PAGE_SIZE = 24
