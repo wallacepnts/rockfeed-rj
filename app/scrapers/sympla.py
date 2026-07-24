@@ -53,6 +53,9 @@ ORGANIZERS = [
     ("studiosuburbia", 315545187),
     ("gabrielmezzalira", 13209059),
     ("oabrigopub", 25086566),
+    ("bulldogrockbar", 28193580),
+    ("calaboucorockbar", 17985282),
+    ("schoolofrockbarradatijuca", 307168404),
 ]
 
 PAGE_SIZE = 24
