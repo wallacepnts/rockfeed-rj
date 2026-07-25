@@ -26,6 +26,7 @@ from app.scrapers.meaple import MeapleScraper
 from app.scrapers.sesccultura import SescCulturaScraper
 from app.scrapers.shotgun import ShotgunScraper
 from app.scrapers.sympla import SymplaEventScraper, SymplaScraper
+from app.scrapers.ticket360 import Ticket360Scraper
 from app.scrapers.uhuu import UhuuScraper
 from app.scrapers.uticket import UticketScraper
 
@@ -45,6 +46,7 @@ SCRAPERS = [
     UhuuScraper(),
     LeveIngressoScraper(),
     SescCulturaScraper(),
+    Ticket360Scraper(),
 ]
 _last_manual_refresh: datetime | None = None
 

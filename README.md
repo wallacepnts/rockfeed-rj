@@ -6,7 +6,8 @@ Microserviço que varre sites de venda de ingressos, filtra shows de **rock no e
 
 ```
 scrapers (Sympla, Eventim, Articket, Meaple, Bileto, Shotgun,
-          uTicket, Clube do Ingresso, Uhuu, Leve Ingresso, Sesc Cultura RJ)
+          uTicket, Clube do Ingresso, Uhuu, Leve Ingresso, Sesc Cultura RJ,
+          Ticket360)
    → filtro de rock (keywords/categoria própria do site, conforme a fonte)
    → SQLite (deduplicação por hash de fonte+URL)
    → /feed.xml (RSS 2.0)
@@ -172,6 +173,7 @@ Ajuste o caminho do volume em `rockfeed-rj.container` (`%h/rockfeed-rj/app/data`
 | **Uhuu** | Só lista avulsa (`EVENTS` em `uhuu.py`) | Sem página de produtor nem listagem filtrável |
 | **Leve Ingresso** | Só lista avulsa (`EVENTS` em `leveingresso.py`) | HTML tradicional, sem bloqueio; sem página de produtor nem organizador exposto |
 | **Sesc Cultura RJ** | Automática — API pública filtrada pela categoria "Show", com filtro de rock por keyword (`is_rock()`) sobre título+sinopse | Programação cultural do Sesc no estado inteiro; maioria não é rock (forró/pagode/samba/MPB), então usa o filtro genérico em vez de aceitar tudo (ver `sesccultura.py`) |
+| **Ticket360** | Automática — sub-categorias próprias "Rock" e "Rock & Roll" (`CATEGORIES` em `ticket360.py`), filtrando por `addressRegion == "RJ"` | Plataforma nacional; cada evento traz um JSON-LD `MusicEvent` completo (endereço com estado, preço, organizador) |
 
 "Automática" significa que, uma vez que um produtor/canal/local está na lista rastreada, novos shows dele aparecem sozinhos nas próximas varreduras — sem precisar mexer no código. Fontes "só lista avulsa" exigem adicionar o link de cada show manualmente.
 
