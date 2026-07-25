@@ -15,8 +15,14 @@ Fluxo:
 - eventinfo/<id>              -> detalhes completos de qualquer evento
 - tickettype?eventId=<id>     -> preços dos ingressos
 
-Produtores curados em ORGANIZERS; eventos avulsos (quando não tem página
-de produtor) em EVENTS — só precisa do link do evento.
+Produtores curados em ORGANIZERS (por slug — a maioria); eventos avulsos
+(quando não tem página de produtor) em EVENTS — só precisa do link do
+evento. Às vezes o userId que aparece no eventinfo de um show avulso é
+diferente do userId da página pública do produtor (ex: conta operacional
+vs. conta "vitrine" do produtor) — nesse caso o event/user/<userId> da
+página pública pode não listar o show. Se acontecer, adicione o userId
+numérico visto no eventinfo (campo "userId") direto em ORGANIZER_IDS, sem
+precisar de slug.
 """
 from __future__ import annotations
 
@@ -37,6 +43,13 @@ ORGANIZERS = [
     "bulldogrockbar",
     "lordpub",
     "saturnaliaproducoes",
+]
+
+# (rótulo, userId) — quando já se sabe o userId de verdade (visto no
+# eventinfo de um show avulso) e não faz sentido resolver por slug (ver
+# docstring do módulo).
+ORGANIZER_IDS = [
+    ("ariesproducoes", 544805),
 ]
 
 EVENTS = [
@@ -75,6 +88,8 @@ class UticketScraper(Scraper):
             targets: list[tuple[str, str]] = []  # (event_id, rótulo de origem)
             for slug in ORGANIZERS:
                 targets.extend(self._discover_organizer_events(page, slug))
+            for label, user_id in ORGANIZER_IDS:
+                targets.extend(self._discover_organizer_events_by_id(page, label, user_id))
 
             self._navigate(page)  # renova a sessão antes da rodada de detalhes
 
@@ -111,6 +126,16 @@ class UticketScraper(Scraper):
             log.warning("uticket: falha ao buscar produtor '%s', pulando", slug)
             return []
         return [(item["id"], f"{self.name}:{slug}") for item in listing]
+
+    def _discover_organizer_events_by_id(
+        self, page, label: str, user_id: int
+    ) -> list[tuple[str, str]]:
+        try:
+            listing = self._fetch_json(page, f"{API_BASE}/event/user/{user_id}")
+        except Exception:
+            log.warning("uticket: falha ao buscar produtor '%s' (userId %d), pulando", label, user_id)
+            return []
+        return [(item["id"], f"{self.name}:{label}") for item in (listing or [])]
 
     def _fetch_event(self, page, event_id: str, label: str) -> Event | None:
         try:

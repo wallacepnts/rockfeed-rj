@@ -58,6 +58,7 @@ def test_parses_organizer_events_and_standalone_events():
 
     with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)), \
          patch("app.scrapers.uticket.ORGANIZERS", ["garagegrindhouse"]), \
+         patch("app.scrapers.uticket.ORGANIZER_IDS", []), \
          patch("app.scrapers.uticket.EVENTS", []):
         events = UticketScraper().fetch()
 
@@ -85,6 +86,7 @@ def test_standalone_event_uses_bare_source():
 
     with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)), \
          patch("app.scrapers.uticket.ORGANIZERS", []), \
+         patch("app.scrapers.uticket.ORGANIZER_IDS", []), \
          patch("app.scrapers.uticket.EVENTS", [
              "https://uticket.com.br/evento/x/01M6Z9W7XDG0M9?utm_source=ig",
          ]):
@@ -101,6 +103,7 @@ def test_hidden_event_is_skipped():
 
     with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)), \
          patch("app.scrapers.uticket.ORGANIZERS", []), \
+         patch("app.scrapers.uticket.ORGANIZER_IDS", []), \
          patch("app.scrapers.uticket.EVENTS", ["https://uticket.com.br/evento/x/01M6Z9W7XDG0M9"]):
         events = UticketScraper().fetch()
 
@@ -114,6 +117,7 @@ def test_organizer_failure_is_skipped_not_fatal():
 
     with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)), \
          patch("app.scrapers.uticket.ORGANIZERS", ["bad"]), \
+         patch("app.scrapers.uticket.ORGANIZER_IDS", []), \
          patch("app.scrapers.uticket.EVENTS", []):
         events = UticketScraper().fetch()
 
@@ -125,6 +129,37 @@ def test_site_unreachable_returns_empty():
     page.goto.side_effect = RuntimeError("boom")
 
     with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)):
+        events = UticketScraper().fetch()
+
+    assert events == []
+
+
+def test_discovers_events_by_organizer_id_without_slug():
+    page = make_page({
+        "event/user/544805": EVENT_LIST,
+        "eventinfo/01M89SS401PU7B": EVENT_INFO,
+        "tickettype?eventId=01M89SS401PU7B": TICKET_TYPES,
+    })
+
+    with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)), \
+         patch("app.scrapers.uticket.ORGANIZERS", []), \
+         patch("app.scrapers.uticket.ORGANIZER_IDS", [("ariesproducoes", 544805)]), \
+         patch("app.scrapers.uticket.EVENTS", []):
+        events = UticketScraper().fetch()
+
+    assert len(events) == 1
+    assert events[0].source == "uticket:ariesproducoes"
+
+
+def test_organizer_id_failure_is_skipped_not_fatal():
+    page = make_page({
+        "event/user/999999": RuntimeError("boom"),
+    })
+
+    with patch("app.scrapers.uticket.browser_page", lambda: fake_browser_page(page)), \
+         patch("app.scrapers.uticket.ORGANIZERS", []), \
+         patch("app.scrapers.uticket.ORGANIZER_IDS", [("bad", 999999)]), \
+         patch("app.scrapers.uticket.EVENTS", []):
         events = UticketScraper().fetch()
 
     assert events == []
