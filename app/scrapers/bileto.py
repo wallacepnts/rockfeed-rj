@@ -52,6 +52,14 @@ VENUES = [
         "areninhaculturalgilbertogil",
         "https://www.sympla.com.br/agenda-eventos/-R6QUOaehwPAe8mDRQrX3K5MBXCC72zl3JAKlUcH7KqKrdldldlP9slSmXpvMN6d48hu1TgZQjH_LM6WFda2IsFLSw",
     ),
+    (
+        "areninhaculturalrenatorusso",
+        "https://www.sympla.com.br/agenda-eventos/7RUhFH0soFR8fLSuZL_neeMLpmhn-Md1d8VBU3YUmFUHUlUETK5ys3EsaXI_ot-oZW3gnrlImqBb7N_y_d-HHw",
+    ),
+    (
+        "areninhaculturalterra",
+        "https://www.sympla.com.br/agenda-eventos/B7yw3jMnFiZTN_82qHRKjiZz48ps9ScEyGPIH7GEhiRYPrsEizgijkE07h9Hu_Q_5HoUFyy0ORnSeH4wF9prBg",
+    ),
 ]
 
 # organizer_override por event_id, pra casos em que se sabe quem produz de
@@ -64,6 +72,8 @@ ORGANIZER_OVERRIDES: dict[int, str] = {
 # keyword "tributo" pega homenagens de artistas de outros gêneros.
 EXCLUDED_IDS = {
     121341,  # Igor Garrido - Um Tributo a Fabio Jr (romântico, não rock)
+    122485,  # Tributo Tim Maia - André Marçal & Banda (soul/MPB, não rock)
+    124329,  # Os Três Gigantes do Nordeste (Alceu Valença, Geraldo Azevedo, Zé Ramalho — regional, não rock)
 }
 
 EVENTS = [
@@ -81,6 +91,7 @@ EVENTS = [
     (124279, None),
     (118528, None),
     (122415, None),
+    (124473, None),
 ]
 
 _EVENT_ID_RE = re.compile(r"bileto\.sympla\.com\.br/event/(\d+)")

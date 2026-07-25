@@ -301,4 +301,6 @@ EVENTS = [
     ("https://www.sympla.com.br/evento/plutao-ja-foi-planeta-convida-bia-messis/3494299", None),
     ("https://www.sympla.com.br/evento/john-bianchi-lancamento-album-sinestesia-abertura-banda-mater/3322783", None),
     ("https://www.sympla.com.br/evento/banda-beat-shaver-blues-ao-vivo-no-mississipi-delta-blues-bar/3498261", None),
+    ("https://www.sympla.com.br/evento/show-tributo-a-rita-lee-acustico-com-patricia-lucas/3482495", None),
+    ("https://www.sympla.com.br/evento/duoss-no-bar-do-chico/3486585", None),
 ]
