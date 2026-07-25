@@ -79,6 +79,7 @@ EVENTS = [
     (103244, None),
     (95883, None),
     (124279, None),
+    (118528, None),
 ]
 
 _EVENT_ID_RE = re.compile(r"bileto\.sympla\.com\.br/event/(\d+)")
