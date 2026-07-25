@@ -23,6 +23,7 @@ from app.scrapers.clubedoingresso import ClubeDoIngressoScraper
 from app.scrapers.eventim import EventimScraper
 from app.scrapers.leveingresso import LeveIngressoScraper
 from app.scrapers.meaple import MeapleScraper
+from app.scrapers.sesccultura import SescCulturaScraper
 from app.scrapers.shotgun import ShotgunScraper
 from app.scrapers.sympla import SymplaEventScraper, SymplaScraper
 from app.scrapers.uhuu import UhuuScraper
@@ -43,6 +44,7 @@ SCRAPERS = [
     ClubeDoIngressoScraper(),
     UhuuScraper(),
     LeveIngressoScraper(),
+    SescCulturaScraper(),
 ]
 _last_manual_refresh: datetime | None = None
 
