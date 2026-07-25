@@ -2,39 +2,61 @@
 (bileto.sympla.com.br), usada por casas como a Areninha Cultural Hermeto
 Pascoal.
 
-A API é https://bff-sales-api-cdn.bileto.sympla.com.br/api/v1/events/{id}
-(precisa do header x-api-key visto na própria página do evento). Não existe
-— ou pelo menos não achamos — um endpoint que liste todos os eventos de um
-produtor: o "organizer_id" que a API retorna costuma ser a conta de
-ticketing do próprio local, não o produtor real do show, e a API nunca
-expõe um nome legível de organizador.
+A API de cada evento é
+https://bff-sales-api-cdn.bileto.sympla.com.br/api/v1/events/{id}
+(precisa do header x-api-key visto na própria página do evento). O
+"organizer_id" que ela retorna costuma ser a conta de ticketing do próprio
+local, não o produtor real do show, e a API nunca expõe um nome legível de
+organizador.
 
-Por isso essa fonte funciona por lista curada de eventos, não por produtor:
-pegue o link bileto.sympla.com.br/event/<id> de cada show de rock que
-achar e adicione em EVENTS. Se você souber quem é o produtor de verdade
-(a API não sabe), informe em organizer_override; senão deixe None.
+Descoberta automática por local: a página do produtor
+(site.bileto.sympla.com.br/<slug>/) incorpora um widget "agenda de
+eventos" hospedado em sympla.com.br/agenda-eventos/<hash> que lista todos
+os eventos futuros da casa — capture essa URL abrindo a página do local
+com o DevTools (aba Network) e procurando o iframe/link pra
+"agenda-eventos", e adicione em VENUES. Diferente da Sympla/Meaple, esses
+locais costumam ser centros culturais gerais (teatro, dança, biblioteca
+etc.), não bares de rock dedicados — por isso a descoberta por VENUES
+passa pelo filtro genérico de keywords (is_rock(), base.py) em vez de
+aceitar tudo.
+
+Locais sem esse widget (ou eventos avulsos sem local mapeado) entram em
+EVENTS por link direto; informe organizer_override quando souber quem
+produz de verdade (a API não sabe), senão deixe None.
 """
 from __future__ import annotations
 
 import logging
+import re
 from datetime import datetime
 
 import httpx
 
 from app.models import Event
-from app.scrapers.base import Scraper, get_client, strip_html
+from app.scrapers.base import Scraper, get_client, is_rock, strip_html
 
 API_BASE = "https://bff-sales-api-cdn.bileto.sympla.com.br/api/v1"
 API_KEY = "cQkazy2Wc"
 
+VENUES = [
+    # (rótulo, URL do widget "agenda-eventos" embutido na página do local)
+    (
+        "areninhaculturalhermetopascoal",
+        "https://www.sympla.com.br/agenda-eventos/m-lkysRaP5jPcLaW3iVa0lFyZpw2xH45R4EWhBITmbAoohbI2W6VZd-aK0oBIVSTI_e-UEVd_iUOL5W6yxTDQg",
+    ),
+]
+
+# organizer_override por event_id, pra casos em que se sabe quem produz de
+# verdade mesmo vindo da descoberta automática por local (a API não sabe).
+ORGANIZER_OVERRIDES: dict[int, str] = {
+    119374: "Be Magic",
+}
+
 EVENTS = [
     # (event_id, organizer_override — None se você não souber quem produz)
-    (121087, None),
-    (119374, "Be Magic"),
     (122061, None),
     (124028, None),
     (124027, None),
-    (123463, None),
     (109416, None),
     (120951, None),
     (123596, None),
@@ -46,6 +68,8 @@ EVENTS = [
     (124279, None),
 ]
 
+_EVENT_ID_RE = re.compile(r"bileto\.sympla\.com\.br/event/(\d+)")
+
 log = logging.getLogger("rockfeed")
 
 
@@ -54,15 +78,48 @@ class BiletoScraper(Scraper):
 
     def fetch(self) -> list[Event]:
         events: list[Event] = []
+        seen_ids: set[int] = set()
         with get_client() as client:
+            for label, agenda_url in VENUES:
+                for event_id in self._discover_venue_events(client, agenda_url):
+                    if event_id in seen_ids:
+                        continue
+                    seen_ids.add(event_id)
+                    event = self._fetch_event(
+                        client,
+                        event_id,
+                        ORGANIZER_OVERRIDES.get(event_id),
+                        source=f"{self.name}:{label}",
+                        require_rock=True,
+                    )
+                    if event:
+                        events.append(event)
+
             for event_id, organizer_override in EVENTS:
-                event = self._fetch_event(client, event_id, organizer_override)
+                if event_id in seen_ids:
+                    continue
+                seen_ids.add(event_id)
+                event = self._fetch_event(client, event_id, organizer_override, source=self.name)
                 if event:
                     events.append(event)
         return events
 
+    def _discover_venue_events(self, client: httpx.Client, agenda_url: str) -> list[int]:
+        try:
+            resp = client.get(agenda_url)
+            resp.raise_for_status()
+        except httpx.HTTPError:
+            log.warning("bileto: falha ao buscar agenda %s, pulando", agenda_url)
+            return []
+        return sorted({int(m) for m in _EVENT_ID_RE.findall(resp.text)})
+
     def _fetch_event(
-        self, client: httpx.Client, event_id: int, organizer_override: str | None
+        self,
+        client: httpx.Client,
+        event_id: int,
+        organizer_override: str | None,
+        source: str,
+        require_rock: bool = False,
     ) -> Event | None:
         try:
             resp = client.get(
@@ -73,6 +130,11 @@ class BiletoScraper(Scraper):
             data = resp.json()["data"]
         except httpx.HTTPError:
             log.warning("bileto: falha ao buscar evento %d, pulando", event_id)
+            return None
+
+        title = data.get("name", "")
+        description = strip_html((data.get("description") or {}).get("raw", ""))
+        if require_rock and not is_rock(title, description):
             return None
 
         venue = data.get("venue") or {}
@@ -93,9 +155,9 @@ class BiletoScraper(Scraper):
         image = next((m["url"] for m in images if m.get("rel") == "profile"), "")
 
         return Event(
-            title=data.get("name", ""),
+            title=title,
             url=f"https://bileto.sympla.com.br/event/{event_id}",
-            source=self.name,
+            source=source,
             venue=venue.get("name", ""),
             address=address,
             organizer=organizer_override or "",
@@ -106,7 +168,7 @@ class BiletoScraper(Scraper):
             end_date=None,
             price=self._format_price(data),
             image=image,
-            description=strip_html((data.get("description") or {}).get("raw", "")),
+            description=description,
         )
 
     @staticmethod

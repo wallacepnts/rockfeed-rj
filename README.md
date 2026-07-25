@@ -166,7 +166,7 @@ Ajuste o caminho do volume em `rockfeed-rj.container` (`%h/rockfeed-rj/app/data`
 | **Eventim** | Automática — busca por categoria "Rock" + estado RJ, sem lista curada | Via [`pyventim`](https://pypi.org/project/pyventim/), que usa a API pública da Eventim |
 | **Articket** | Automática, por produtora rastreada (`PAGES` em `articket.py`) | Cada evento traz dados estruturados (JSON-LD) |
 | **Meaple** | Automática, por canal/bar rastreado (`CHANNELS` em `meaple.py`) | API pública de canais |
-| **Bileto** | Só lista avulsa (`EVENTS` em `bileto.py`) | Plataforma legada da Sympla; não existe listagem por produtor |
+| **Bileto** | Automática, por local rastreado (`VENUES` em `bileto.py`, widget "agenda-eventos" da própria página do local) + lista avulsa (`EVENTS`) | Plataforma legada da Sympla; a descoberta por local passa pelo filtro de rock por keyword (`is_rock()`), já que costumam ser centros culturais gerais, não bares de rock |
 | **Shotgun** | Automática, por local rastreado (`VENUES` em `shotgun.py`) | Site protegido por desafio Vercel — usa navegador real (Playwright) |
 | **uTicket** | Automática, por produtor rastreado (`ORGANIZERS`) + lista avulsa (`EVENTS`) | Site protegido por Cloudflare — usa navegador real (Playwright) |
 | **Clube do Ingresso** | Só lista avulsa (`EVENTS` em `clubedoingresso.py`) | Sem página de produtor; a listagem geral do site é nacional e não dá pra filtrar por cidade/gênero |
