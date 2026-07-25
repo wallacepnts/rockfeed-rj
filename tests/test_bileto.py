@@ -169,3 +169,15 @@ def test_event_in_both_venue_and_events_list_is_not_fetched_twice():
 
     assert len(events) == 1
     assert client.get.call_count == 2
+
+
+def test_excluded_ids_are_skipped_even_if_rock_matches():
+    agenda_html = '<a href="https://bileto.sympla.com.br/event/121087">Aliança</a>'
+    with patch("app.scrapers.bileto.get_client") as gc, \
+         patch("app.scrapers.bileto.VENUES", [("areninha", "https://sympla.com.br/agenda/x")]), \
+         patch("app.scrapers.bileto.EVENTS", []), \
+         patch("app.scrapers.bileto.EXCLUDED_IDS", {121087}):
+        gc.return_value = make_client([make_response(agenda_html, is_json=False)])
+        events = BiletoScraper().fetch()
+
+    assert events == []

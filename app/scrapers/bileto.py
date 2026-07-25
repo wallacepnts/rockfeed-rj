@@ -44,6 +44,14 @@ VENUES = [
         "areninhaculturalhermetopascoal",
         "https://www.sympla.com.br/agenda-eventos/m-lkysRaP5jPcLaW3iVa0lFyZpw2xH45R4EWhBITmbAoohbI2W6VZd-aK0oBIVSTI_e-UEVd_iUOL5W6yxTDQg",
     ),
+    (
+        "areninhaculturaljacobdobandolim",
+        "https://www.sympla.com.br/agenda-eventos/scbVCrqXUaM1k_rrCTvpAwNWDlYIZL_ETI0n63qD7xoIlby55QYcdoGYOS-9y-tkfQD2qyHsdr3eAXW2Q7wJ-g",
+    ),
+    (
+        "areninhaculturalgilbertogil",
+        "https://www.sympla.com.br/agenda-eventos/-R6QUOaehwPAe8mDRQrX3K5MBXCC72zl3JAKlUcH7KqKrdldldlP9slSmXpvMN6d48hu1TgZQjH_LM6WFda2IsFLSw",
+    ),
 ]
 
 # organizer_override por event_id, pra casos em que se sabe quem produz de
@@ -52,13 +60,18 @@ ORGANIZER_OVERRIDES: dict[int, str] = {
     119374: "Be Magic",
 }
 
+# Falsos positivos conhecidos do is_rock() na descoberta por local: a
+# keyword "tributo" pega homenagens de artistas de outros gêneros.
+EXCLUDED_IDS = {
+    121341,  # Igor Garrido - Um Tributo a Fabio Jr (romântico, não rock)
+}
+
 EVENTS = [
     # (event_id, organizer_override — None se você não souber quem produz)
     (122061, None),
     (124028, None),
     (124027, None),
     (109416, None),
-    (120951, None),
     (123596, None),
     (124526, None),
     (123300, None),
@@ -82,7 +95,7 @@ class BiletoScraper(Scraper):
         with get_client() as client:
             for label, agenda_url in VENUES:
                 for event_id in self._discover_venue_events(client, agenda_url):
-                    if event_id in seen_ids:
+                    if event_id in seen_ids or event_id in EXCLUDED_IDS:
                         continue
                     seen_ids.add(event_id)
                     event = self._fetch_event(
